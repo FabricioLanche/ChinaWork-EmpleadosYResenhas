@@ -1,5 +1,6 @@
 import boto3
 from boto3.dynamodb.conditions import Key
+from decimal import Decimal
 import json
 
 dynamodb = boto3.resource('dynamodb')
@@ -47,7 +48,7 @@ def lambda_handler(event, context):
                 # 2️⃣ Calcular nuevo promedio
                 calificaciones = [float(i['calificacion']) for i in items]
                 total = sum(calificaciones)
-                promedio = round(total / len(items), 2)
+                promedio = Decimal(str(round(total / len(items), 2)))
 
                 print(f"[DEBUG] Calificaciones: {calificaciones}")
                 print(f"[DEBUG] Promedio calculado: {promedio}")
