@@ -1,0 +1,280 @@
+{
+	"info": {
+		"_postman_id": "china-work-empleados-resenas",
+		"name": "ChinaWork - Empleados y Reseñas API",
+		"description": "Colección de endpoints para el microservicio de gestión de empleados y reseñas de China Wok",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Empleados",
+			"item": [
+				{
+					"name": "Crear Empleado",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"local_id\": \"LOCAL001\",\n  \"dni\": \"12345678\",\n  \"nombre\": \"Juan\",\n  \"apellido\": \"Pérez\",\n  \"role\": \"Cocinero\",\n  \"calificacion_prom\": 0,\n  \"sueldo\": 1500\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/empleados",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"empleados"
+							]
+						},
+						"description": "Crea un nuevo empleado en el sistema. Campos requeridos: local_id, dni, nombre, apellido, role."
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener Empleado",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/empleados/{{local_id}}/{{dni}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"empleados",
+								"{{local_id}}",
+								"{{dni}}"
+							]
+						},
+						"description": "Obtiene la información de un empleado específico por local_id y dni."
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Empleados por Local",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/empleados/local/{{local_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"empleados",
+								"local",
+								"{{local_id}}"
+							]
+						},
+						"description": "Lista todos los empleados de un local específico."
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Empleados por Local y Rol",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/empleados/local/{{local_id}}/rol/Cocinero",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"empleados",
+								"local",
+								"{{local_id}}",
+								"rol",
+								"Cocinero"
+							]
+						},
+						"description": "Lista empleados filtrados por local y rol. Roles válidos: Cocinero, Despachador, Repartidor."
+					},
+					"response": []
+				},
+				{
+					"name": "Actualizar Empleado",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Juan Carlos\",\n  \"calificacion_prom\": 4.5,\n  \"sueldo\": 1800\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/empleados/{{local_id}}/{{dni}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"empleados",
+								"{{local_id}}",
+								"{{dni}}"
+							]
+						},
+						"description": "Actualiza la información de un empleado. Solo se actualizan los campos enviados en el body."
+					},
+					"response": []
+				},
+				{
+					"name": "Eliminar Empleado",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/empleados/{{local_id}}/{{dni}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"empleados",
+								"{{local_id}}",
+								"{{dni}}"
+							]
+						},
+						"description": "Elimina un empleado del sistema."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints para la gestión CRUD de empleados"
+		},
+		{
+			"name": "Reseñas",
+			"item": [
+				{
+					"name": "Registrar Reseña de Pedido",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"local_id\": \"LOCAL001\",\n  \"pedido_id\": \"PED123\",\n  \"calificacion\": 5,\n  \"resena\": \"Excelente servicio, comida deliciosa y entrega rápida\",\n  \"cocinero_dni\": \"12345678\",\n  \"despachador_dni\": \"87654321\",\n  \"repartidor_dni\": \"11223344\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/resenas",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"resenas"
+							]
+						},
+						"description": "Registra una reseña de pedido. Crea 3 registros automáticamente (uno por cada rol: cocinero, despachador, repartidor). El DynamoDB Stream actualizará automáticamente el promedio de calificaciones de cada empleado."
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener Reseñas de Empleado",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/resenas/{{local_id}}/{{dni}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"resenas",
+								"{{local_id}}",
+								"{{dni}}"
+							]
+						},
+						"description": "Obtiene todas las reseñas de un empleado específico."
+					},
+					"response": []
+				},
+				{
+					"name": "Actualizar Reseña",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"resena\": \"Servicio excelente, muy recomendado\",\n  \"calificacion\": 5\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/resenas/{{local_id}}/{{dni}}/{{resena_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"resenas",
+								"{{local_id}}",
+								"{{dni}}",
+								"{{resena_id}}"
+							]
+						},
+						"description": "Actualiza una reseña específica. Solo se actualizan los campos 'resena' y 'calificacion'."
+					},
+					"response": []
+				},
+				{
+					"name": "Eliminar Reseña",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/resenas/{{local_id}}/{{dni}}/{{resena_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"resenas",
+								"{{local_id}}",
+								"{{dni}}",
+								"{{resena_id}}"
+							]
+						},
+						"description": "Elimina una reseña específica del sistema."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints para la gestión de reseñas de empleados por pedido"
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "https://your-api-gateway-url.execute-api.us-east-1.amazonaws.com/dev",
+			"type": "string"
+		},
+		{
+			"key": "local_id",
+			"value": "LOCAL001",
+			"type": "string"
+		},
+		{
+			"key": "dni",
+			"value": "12345678",
+			"type": "string"
+		},
+		{
+			"key": "resena_id",
+			"value": "uuid-de-resena",
+			"type": "string"
+		}
+	]
+}

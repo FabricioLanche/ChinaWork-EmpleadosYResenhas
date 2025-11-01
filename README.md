@@ -127,31 +127,52 @@ Este microservicio utiliza **DynamoDB Streams** para actualizar automáticamente
 
 ### Configuración de Variables de Entorno
 
-Este proyecto utiliza variables de entorno para proteger información sensible como el ARN del DynamoDB Stream.
+Este proyecto utiliza variables de entorno para proteger información sensible y facilitar la portabilidad entre diferentes cuentas AWS.
 
 #### 1. Copia el archivo de ejemplo:
 ```bash
 cp .env.example .env
 ```
 
-#### 2. Habilita DynamoDB Stream en tu tabla:
+#### 2. Obtén tu AWS Account ID:
+
+**Opción A - AWS Console:**
+- Click en tu nombre de usuario (esquina superior derecha)
+- El Account ID (12 dígitos) aparece en el menú desplegable
+
+**Opción B - AWS CLI:**
+```bash
+aws sts get-caller-identity --query Account --output text
+```
+
+**Opción C - AWS Academy Learner Lab:**
+- Ve a la página de detalles del Learner Lab
+- El Account ID está visible en la información del laboratorio
+
+#### 3. Habilita DynamoDB Stream en tu tabla:
 - Ve a **AWS Console** → **DynamoDB** → **Tables** → **Resenas**
 - Pestaña **"Exports and streams"**
 - Click en **"Enable DynamoDB stream"**
 - Selecciona **"New image"**
 - Copia el **Stream ARN** generado (ejemplo: `arn:aws:dynamodb:us-east-1:123456789012:table/ChinaWok-Resenas/stream/2025-11-01T12:34:56.789`)
 
-#### 3. Configura el archivo `.env`:
-Pega el ARN copiado:
+#### 4. Configura el archivo `.env`:
+Edita el archivo `.env` con tus valores:
 ```bash
-RESENAS_STREAM_ARN=arn:aws:dynamodb:us-east-1:YOUR_ACCOUNT_ID:table/YOUR_TABLE/stream/TIMESTAMP
+# AWS Account ID (12 dígitos)
+AWS_ACCOUNT_ID=043280570137
+
+# Stream ARN completo
+RESENAS_STREAM_ARN=arn:aws:dynamodb:us-east-1:043280570137:table/ChinaWok-Resenas/stream/2025-11-01T21:43:23.239
 ```
 
 #### ⚠️ Importante para AWS Academy Learner Lab:
-Si usas AWS Academy, el **Account ID** cambiará cada vez que inicies un nuevo laboratorio. Deberás:
-1. Obtener el nuevo Stream ARN de la tabla `Resenas`
-2. Actualizar el valor en el archivo `.env`
-3. Redesplegar con `serverless deploy`
+Si usas AWS Academy, el **Account ID** cambiará cada vez que inicies un nuevo laboratorio. Cuando esto ocurra:
+1. Obtén el nuevo Account ID del laboratorio
+2. Actualiza `AWS_ACCOUNT_ID` en el archivo `.env`
+3. Obtén el nuevo Stream ARN de la tabla `Resenas`
+4. Actualiza `RESENAS_STREAM_ARN` en el archivo `.env`
+5. Redesplegar con `serverless deploy`
 
 ### Pasos para Desplegar
 
@@ -248,12 +269,26 @@ curl -X GET https://your-api-url/resenas/LOCAL001/12345678
 - Calificación: debe estar entre 0 y 5
 - Cada pedido genera 3 reseñas (una por rol: cocinero, despachador, repartidor)
 
+## Estructura de Archivos de Configuración
 
-### `.env.example` (se sube a Git)
-Plantilla con placeholders para compartir:
+
+### `.env.example` (SÍ se sube a Git)
+Plantilla con placeholders para compartir con el equipo:
 ```bash
+# AWS Account ID (12 dígitos)
+AWS_ACCOUNT_ID=123456789012
+
+# DynamoDB Stream ARN
 RESENAS_STREAM_ARN=arn:aws:dynamodb:REGION:ACCOUNT_ID:table/TABLE_NAME/stream/TIMESTAMP
 ```
+
+### Variables de entorno utilizadas:
+
+| Variable | Descripción | Usado en |
+|----------|-------------|----------|
+| `AWS_ACCOUNT_ID` | Tu AWS Account ID (12 dígitos) | IAM Role ARN en `serverless.yml` |
+| `RESENAS_STREAM_ARN` | ARN completo del DynamoDB Stream | Evento de Stream para la función Lambda |
+
 
 ## Notas Técnicas
 
