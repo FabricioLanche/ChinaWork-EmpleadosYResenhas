@@ -2,7 +2,7 @@ import boto3, json
 from decimal import Decimal
 
 dynamodb = boto3.resource('dynamodb')
-table = dynamodb.Table('Resenas')
+table = dynamodb.Table('ChinaWok-Resenas')
 
 class DecimalEncoder(json.JSONEncoder):
     def default(self, obj):

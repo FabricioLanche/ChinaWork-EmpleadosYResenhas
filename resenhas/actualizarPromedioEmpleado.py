@@ -2,8 +2,8 @@ import boto3
 from boto3.dynamodb.conditions import Key
 
 dynamodb = boto3.resource('dynamodb')
-tabla_resenas = dynamodb.Table('Resenas')
-tabla_empleados = dynamodb.Table('Empleados')
+tabla_resenas = dynamodb.Table('ChinaWok-Resenas')
+tabla_empleados = dynamodb.Table('ChinaWok-Empleados')
 
 def lambda_handler(event, context):
     for record in event['Records']:
