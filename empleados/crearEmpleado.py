@@ -18,12 +18,12 @@ def lambda_handler(event, context):
         if field not in body:
             return {'statusCode': 400, 'body': json.dumps({'error': f"Falta el campo requerido: {field}"})}
 
-    # Validaciones básicas
-    calificacion = body.get('calificacion_prom', 0)
-    if not (0 <= calificacion <= 5):
+    # Validaciones y conversión a Decimal
+    calificacion = Decimal(str(body.get('calificacion_prom', 0)))
+    if not (Decimal('0') <= calificacion <= Decimal('5')):
         return {'statusCode': 400, 'body': json.dumps({'error': 'La calificación debe estar entre 0 y 5'})}
-    
-    sueldo = body.get('sueldo', 0)
+
+    sueldo = Decimal(str(body.get('sueldo', 0)))
     if sueldo < 0:
         return {'statusCode': 400, 'body': json.dumps({'error': 'El sueldo no puede ser negativo'})}
 

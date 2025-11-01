@@ -14,17 +14,24 @@ def lambda_handler(event, context):
     body = json.loads(event['body'])
     required = ['local_id', 'pedido_id', 'calificacion', 'resena',
                 'cocinero_dni', 'despachador_dni', 'repartidor_dni']
-    
+
     for field in required:
         if field not in body:
             return {'statusCode': 400, 'body': json.dumps({'error': f"Falta el campo {field}"})}
-    
+
+    # Convertir calificacion a Decimal para DynamoDB
+    calificacion = Decimal(str(body['calificacion']))
+
+    # Validar rango de calificación
+    if not (Decimal('0') <= calificacion <= Decimal('5')):
+        return {'statusCode': 400, 'body': json.dumps({'error': 'La calificación debe estar entre 0 y 5'})}
+
     empleados = [
         ('Cocinero', body['cocinero_dni']),
         ('Despachador', body['despachador_dni']),
         ('Repartidor', body['repartidor_dni'])
     ]
-    
+
     items_creados = []
     for rol, dni in empleados:
         pk = f"LOCAL#{body['local_id']}#EMP#{dni}"
@@ -36,7 +43,7 @@ def lambda_handler(event, context):
             'rol': rol,
             'pedido_id': body['pedido_id'],
             'resena': body['resena'],
-            'calificacion': body['calificacion']
+            'calificacion': calificacion
         }
         tabla_resenas.put_item(Item=item)
         items_creados.append(item)

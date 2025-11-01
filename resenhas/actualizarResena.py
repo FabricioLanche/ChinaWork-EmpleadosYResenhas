@@ -23,8 +23,11 @@ def lambda_handler(event, context):
     for k, v in body.items():
         if k not in ['resena', 'calificacion']:
             continue
-        if k == 'calificacion' and not (0 <= v <= 5):
-            return {'statusCode': 400, 'body': json.dumps({'error': 'Calificación fuera de rango'})}
+        if k == 'calificacion':
+            # Convertir a Decimal para DynamoDB
+            v = Decimal(str(v))
+            if not (Decimal('0') <= v <= Decimal('5')):
+                return {'statusCode': 400, 'body': json.dumps({'error': 'Calificación fuera de rango'})}
         update_expr.append(f"{k} = :{k}")
         expr_vals[f":{k}"] = v
 

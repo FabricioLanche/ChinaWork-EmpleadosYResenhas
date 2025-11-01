@@ -20,6 +20,16 @@ def lambda_handler(event, context):
     for key, value in body.items():
         if key not in ['nombre', 'apellido', 'calificacion_prom', 'sueldo', 'role']:
             continue
+
+        # Convertir campos numéricos a Decimal
+        if key in ['calificacion_prom', 'sueldo']:
+            value = Decimal(str(value))
+            # Validar rangos
+            if key == 'calificacion_prom' and not (Decimal('0') <= value <= Decimal('5')):
+                return {'statusCode': 400, 'body': json.dumps({'error': 'La calificación debe estar entre 0 y 5'})}
+            if key == 'sueldo' and value < 0:
+                return {'statusCode': 400, 'body': json.dumps({'error': 'El sueldo no puede ser negativo'})}
+
         update_expr.append(f"{key} = :{key}")
         expr_attr_vals[f":{key}"] = value
 
