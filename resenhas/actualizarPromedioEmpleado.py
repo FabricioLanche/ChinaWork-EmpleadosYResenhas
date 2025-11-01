@@ -1,35 +1,79 @@
 import boto3
 from boto3.dynamodb.conditions import Key
+import json
 
 dynamodb = boto3.resource('dynamodb')
 tabla_resenas = dynamodb.Table('ChinaWok-Resenas')
 tabla_empleados = dynamodb.Table('ChinaWok-Empleados')
 
 def lambda_handler(event, context):
-    for record in event['Records']:
-        if record['eventName'] != 'INSERT':
-            continue
+    try:
+        print(f"[DEBUG] Evento recibido: {json.dumps(event, indent=2)}")
+        print(f"[DEBUG] Número de registros: {len(event['Records'])}")
 
-        item = record['dynamodb']['NewImage']
-        local_id = item['local_id']['S']
-        empleado_dni = item['empleado_dni']['S']
-        pk = f"LOCAL#{local_id}#EMP#{empleado_dni}"
+        for record in event['Records']:
+            try:
+                print(f"[DEBUG] Tipo de evento: {record['eventName']}")
 
-        # 1️⃣ Consultar todas las reseñas del empleado
-        response = tabla_resenas.query(KeyConditionExpression=Key('pk').eq(pk))
-        items = response['Items']
-        if not items:
-            continue
+                if record['eventName'] != 'INSERT':
+                    print(f"[DEBUG] Evento ignorado (no es INSERT): {record['eventName']}")
+                    continue
 
-        # 2️⃣ Calcular nuevo promedio
-        total = sum(float(i['calificacion']) for i in items)
-        promedio = round(total / len(items), 2)
+                # Extraer datos del Stream
+                item = record['dynamodb']['NewImage']
+                print(f"[DEBUG] NewImage completo: {json.dumps(item, indent=2)}")
 
-        # 3️⃣ Actualizar calificacion_prom en tabla Empleados
-        tabla_empleados.update_item(
-            Key={'local_id': local_id, 'dni': empleado_dni},
-            UpdateExpression="SET calificacion_prom = :p",
-            ExpressionAttributeValues={':p': promedio}
-        )
+                # Verificar que existan los campos necesarios
+                if 'local_id' not in item or 'empleado_dni' not in item:
+                    print(f"[ERROR] Faltan campos 'local_id' o 'empleado_dni' en el item")
+                    continue
 
-    return {'statusCode': 200, 'body': 'Promedios actualizados correctamente'}
+                local_id = item['local_id']['S']
+                empleado_dni = item['empleado_dni']['S']
+                pk = f"LOCAL#{local_id}#EMP#{empleado_dni}"
+
+                print(f"[DEBUG] Procesando empleado: local_id={local_id}, dni={empleado_dni}, pk={pk}")
+
+                # 1️⃣ Consultar todas las reseñas del empleado
+                response = tabla_resenas.query(KeyConditionExpression=Key('pk').eq(pk))
+                items = response['Items']
+
+                print(f"[DEBUG] Reseñas encontradas: {len(items)}")
+
+                if not items:
+                    print(f"[DEBUG] No se encontraron reseñas para {pk}")
+                    continue
+
+                # 2️⃣ Calcular nuevo promedio
+                calificaciones = [float(i['calificacion']) for i in items]
+                total = sum(calificaciones)
+                promedio = round(total / len(items), 2)
+
+                print(f"[DEBUG] Calificaciones: {calificaciones}")
+                print(f"[DEBUG] Promedio calculado: {promedio}")
+
+                # 3️⃣ Actualizar calificacion_prom en tabla Empleados
+                tabla_empleados.update_item(
+                    Key={'local_id': local_id, 'dni': empleado_dni},
+                    UpdateExpression="SET calificacion_prom = :p",
+                    ExpressionAttributeValues={':p': promedio}
+                )
+
+                print(f"[DEBUG] Promedio actualizado exitosamente para empleado {empleado_dni}: {promedio}")
+
+            except Exception as e:
+                print(f"[ERROR] Error procesando registro individual: {str(e)}")
+                print(f"[ERROR] Tipo de error: {type(e).__name__}")
+                import traceback
+                print(f"[ERROR] Traceback: {traceback.format_exc()}")
+                # Continuar con el siguiente registro
+                continue
+
+        return {'statusCode': 200, 'body': 'Promedios actualizados correctamente'}
+
+    except Exception as e:
+        print(f"[ERROR] Error crítico en lambda_handler: {str(e)}")
+        print(f"[ERROR] Tipo de error: {type(e).__name__}")
+        import traceback
+        print(f"[ERROR] Traceback: {traceback.format_exc()}")
+        raise
