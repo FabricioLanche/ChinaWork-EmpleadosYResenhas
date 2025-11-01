@@ -7,7 +7,7 @@ provider:
   memorySize: 256
   timeout: 20
   iam:
-    role: arn:aws:iam::237501073282:role/LabRole
+    role: arn:aws:iam::${env:AWS_ACCOUNT_ID}:role/LabRole
 
 functions:
   # ========== EMPLEADOS ==========
@@ -18,7 +18,7 @@ functions:
           path: /empleados
           method: post
           cors: true
-          integration: lambda
+          integration: lambda-proxy
 
   obtenerEmpleado:
     handler: empleados/obtenerEmpleado.lambda_handler
@@ -27,7 +27,7 @@ functions:
           path: /empleados/{local_id}/{dni}
           method: get
           cors: true
-          integration: lambda
+          integration: lambda-proxy
 
   listarEmpleadosPorLocal:
     handler: empleados/listarEmpleadosPorLocal.lambda_handler
@@ -36,7 +36,7 @@ functions:
           path: /empleados/local/{local_id}
           method: get
           cors: true
-          integration: lambda
+          integration: lambda-proxy
 
   listarEmpleadosPorRol:
     handler: empleados/listarEmpleadosPorRol.lambda_handler
@@ -45,7 +45,7 @@ functions:
           path: /empleados/local/{local_id}/rol/{role}
           method: get
           cors: true
-          integration: lambda
+          integration: lambda-proxy
 
   actualizarEmpleado:
     handler: empleados/actualizarEmpleado.lambda_handler
@@ -54,7 +54,7 @@ functions:
           path: /empleados/{local_id}/{dni}
           method: put
           cors: true
-          integration: lambda
+          integration: lambda-proxy
 
   eliminarEmpleado:
     handler: empleados/eliminarEmpleado.lambda_handler
@@ -63,7 +63,7 @@ functions:
           path: /empleados/{local_id}/{dni}
           method: delete
           cors: true
-          integration: lambda
+          integration: lambda-proxy
 
   # ========== RESENHAS ==========
   registrarResena:
@@ -73,7 +73,7 @@ functions:
           path: /resenas
           method: post
           cors: true
-          integration: lambda
+          integration: lambda-proxy
 
   obtenerResenasPorEmpleado:
     handler: resenhas/obtenerResenasPorEmpleado.lambda_handler
@@ -82,7 +82,7 @@ functions:
           path: /resenas/{local_id}/{empleado_dni}
           method: get
           cors: true
-          integration: lambda
+          integration: lambda-proxy
 
   actualizarResena:
     handler: resenhas/actualizarResena.lambda_handler
@@ -91,7 +91,7 @@ functions:
           path: /resenas/{local_id}/{empleado_dni}/{resena_id}
           method: put
           cors: true
-          integration: lambda
+          integration: lambda-proxy
 
   eliminarResena:
     handler: resenhas/eliminarResena.lambda_handler
@@ -100,7 +100,7 @@ functions:
           path: /resenas/{local_id}/{empleado_dni}/{resena_id}
           method: delete
           cors: true
-          integration: lambda
+          integration: lambda-proxy
 
   # ========== DYNAMODB STREAMS ==========
   actualizarPromedioEmpleado:
