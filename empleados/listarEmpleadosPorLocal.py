@@ -1,8 +1,15 @@
 import boto3, json
 from boto3.dynamodb.conditions import Key
+from decimal import Decimal
 
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table('Empleados')
+
+class DecimalEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, Decimal):
+            return float(obj)
+        return super(DecimalEncoder, self).default(obj)
 
 def lambda_handler(event, context):
     try:
@@ -19,7 +26,7 @@ def lambda_handler(event, context):
             KeyConditionExpression=Key('local_id').eq(local_id)
         )
 
-        return {'statusCode': 200, 'body': json.dumps(response['Items'])}
+        return {'statusCode': 200, 'body': json.dumps(response['Items'], cls=DecimalEncoder)}
 
     except Exception as e:
         return {

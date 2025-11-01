@@ -1,7 +1,14 @@
 import boto3, json
+from decimal import Decimal
 
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table('Resenas')
+
+class DecimalEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, Decimal):
+            return float(obj)
+        return super(DecimalEncoder, self).default(obj)
 
 def lambda_handler(event, context):
     local_id = event['pathParameters']['local_id']
@@ -24,10 +31,11 @@ def lambda_handler(event, context):
     if not update_expr:
         return {'statusCode': 400, 'body': json.dumps({'error': 'No hay campos válidos para actualizar'})}
 
-    table.update_item(
+    response = table.update_item(
         Key={'pk': pk, 'resena_id': resena_id},
         UpdateExpression="SET " + ", ".join(update_expr),
-        ExpressionAttributeValues=expr_vals
+        ExpressionAttributeValues=expr_vals,
+        ReturnValues='ALL_NEW'
     )
 
-    return {'statusCode': 200, 'body': json.dumps({'message': 'Reseña actualizada'})}
+    return {'statusCode': 200, 'body': json.dumps({'message': 'Reseña actualizada', 'resena': response['Attributes']}, cls=DecimalEncoder)}

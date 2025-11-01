@@ -1,7 +1,14 @@
 import boto3, json
+from decimal import Decimal
 
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table('Empleados')
+
+class DecimalEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, Decimal):
+            return float(obj)
+        return super(DecimalEncoder, self).default(obj)
 
 def lambda_handler(event, context):
     local_id = event['pathParameters']['local_id']
@@ -12,4 +19,4 @@ def lambda_handler(event, context):
     if 'Item' not in response:
         return {'statusCode': 404, 'body': json.dumps({'error': 'Empleado no encontrado'})}
 
-    return {'statusCode': 200, 'body': json.dumps(response['Item'])}
+    return {'statusCode': 200, 'body': json.dumps(response['Item'], cls=DecimalEncoder)}

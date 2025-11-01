@@ -1,7 +1,14 @@
 import boto3, json, uuid
+from decimal import Decimal
 
 dynamodb = boto3.resource('dynamodb')
 tabla_resenas = dynamodb.Table('Resenas')
+
+class DecimalEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, Decimal):
+            return float(obj)
+        return super(DecimalEncoder, self).default(obj)
 
 def lambda_handler(event, context):
     body = json.loads(event['body'])
@@ -36,5 +43,5 @@ def lambda_handler(event, context):
 
     return {
         'statusCode': 201,
-        'body': json.dumps({'message': 'Reseñas registradas para los empleados del pedido', 'resenas': items_creados})
+        'body': json.dumps({'message': 'Reseñas registradas para los empleados del pedido', 'resenas': items_creados}, cls=DecimalEncoder)
     }
