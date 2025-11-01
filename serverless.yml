@@ -1,0 +1,114 @@
+org: jhoganpachacutec
+service: china-work-resenha-empleado
+
+provider:
+  name: aws
+  runtime: python3.13
+  memorySize: 256
+  timeout: 20
+  iam:
+    role: arn:aws:iam::237501073282:role/LabRole
+
+functions:
+  # ========== EMPLEADOS ==========
+  crearEmpleado:
+    handler: empleados/crearEmpleado.lambda_handler
+    events:
+      - http:
+          path: /empleados
+          method: post
+          cors: true
+          integration: lambda
+
+  obtenerEmpleado:
+    handler: empleados/obtenerEmpleado.lambda_handler
+    events:
+      - http:
+          path: /empleados/{local_id}/{dni}
+          method: get
+          cors: true
+          integration: lambda
+
+  listarEmpleadosPorLocal:
+    handler: empleados/listarEmpleadosPorLocal.lambda_handler
+    events:
+      - http:
+          path: /empleados/local/{local_id}
+          method: get
+          cors: true
+          integration: lambda
+
+  listarEmpleadosPorRol:
+    handler: empleados/listarEmpleadosPorRol.lambda_handler
+    events:
+      - http:
+          path: /empleados/local/{local_id}/rol/{role}
+          method: get
+          cors: true
+          integration: lambda
+
+  actualizarEmpleado:
+    handler: empleados/actualizarEmpleado.lambda_handler
+    events:
+      - http:
+          path: /empleados/{local_id}/{dni}
+          method: put
+          cors: true
+          integration: lambda
+
+  eliminarEmpleado:
+    handler: empleados/eliminarEmpleado.lambda_handler
+    events:
+      - http:
+          path: /empleados/{local_id}/{dni}
+          method: delete
+          cors: true
+          integration: lambda
+
+  # ========== RESENHAS ==========
+  registrarResena:
+    handler: resenhas/registrarResena.lambda_handler
+    events:
+      - http:
+          path: /resenas
+          method: post
+          cors: true
+          integration: lambda
+
+  obtenerResenasPorEmpleado:
+    handler: resenhas/obtenerResenasPorEmpleado.lambda_handler
+    events:
+      - http:
+          path: /resenas/{local_id}/{empleado_dni}
+          method: get
+          cors: true
+          integration: lambda
+
+  actualizarResena:
+    handler: resenhas/actualizarResena.lambda_handler
+    events:
+      - http:
+          path: /resenas/{local_id}/{empleado_dni}/{resena_id}
+          method: put
+          cors: true
+          integration: lambda
+
+  eliminarResena:
+    handler: resenhas/eliminarResena.lambda_handler
+    events:
+      - http:
+          path: /resenas/{local_id}/{empleado_dni}/{resena_id}
+          method: delete
+          cors: true
+          integration: lambda
+
+  # ========== DYNAMODB STREAMS ==========
+  actualizarPromedioEmpleado:
+    handler: resenhas/actualizarPromedioEmpleado.lambda_handler
+    events:
+      - stream:
+          type: dynamodb
+          arn: ${env:RESENAS_STREAM_ARN}
+          batchSize: 10
+          startingPosition: LATEST
+          enabled: true
