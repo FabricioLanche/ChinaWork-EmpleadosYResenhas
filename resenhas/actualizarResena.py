@@ -12,11 +12,8 @@ class DecimalEncoder(json.JSONEncoder):
 
 def lambda_handler(event, context):
     local_id = event['pathParameters']['local_id']
-    empleado_dni = event['pathParameters']['empleado_dni']
     resena_id = event['pathParameters']['resena_id']
     body = json.loads(event['body'])
-
-    pk = f"LOCAL#{local_id}#EMP#{empleado_dni}"
 
     update_expr = []
     expr_vals = {}
@@ -34,11 +31,14 @@ def lambda_handler(event, context):
     if not update_expr:
         return {'statusCode': 400, 'body': json.dumps({'error': 'No hay campos válidos para actualizar'})}
 
-    response = table.update_item(
-        Key={'pk': pk, 'resena_id': resena_id},
-        UpdateExpression="SET " + ", ".join(update_expr),
-        ExpressionAttributeValues=expr_vals,
-        ReturnValues='ALL_NEW'
-    )
+    try:
+        response = table.update_item(
+            Key={'local_id': local_id, 'resena_id': resena_id},
+            UpdateExpression="SET " + ", ".join(update_expr),
+            ExpressionAttributeValues=expr_vals,
+            ReturnValues='ALL_NEW'
+        )
 
-    return {'statusCode': 200, 'body': json.dumps({'message': 'Reseña actualizada', 'resena': response['Attributes']}, cls=DecimalEncoder)}
+        return {'statusCode': 200, 'body': json.dumps({'message': 'Reseña actualizada', 'resena': response['Attributes']}, cls=DecimalEncoder)}
+    except Exception as e:
+        return {'statusCode': 500, 'body': json.dumps({'error': f"Error al actualizar reseña: {str(e)}"})}

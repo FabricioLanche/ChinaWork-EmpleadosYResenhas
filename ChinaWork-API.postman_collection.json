@@ -165,7 +165,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"local_id\": \"LOCAL001\",\n  \"pedido_id\": \"PED123\",\n  \"calificacion\": 5,\n  \"resena\": \"Excelente servicio, comida deliciosa y entrega rápida\",\n  \"cocinero_dni\": \"12345678\",\n  \"despachador_dni\": \"87654321\",\n  \"repartidor_dni\": \"11223344\"\n}"
+							"raw": "{\n  \"local_id\": \"LOCAL001\",\n  \"pedido_id\": \"PED123\",\n  \"calificacion\": 5,\n  \"resena\": \"Excelente servicio, comida deliciosa y entrega rápida\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/resenas",
@@ -176,7 +176,27 @@
 								"resenas"
 							]
 						},
-						"description": "Registra una reseña de pedido. Crea 3 registros automáticamente (uno por cada rol: cocinero, despachador, repartidor). El DynamoDB Stream actualizará automáticamente el promedio de calificaciones de cada empleado."
+						"description": "Registra una reseña de pedido. Los DNIs de empleados (cocinero, despachador, repartidor) se extraen automáticamente del historial de estados del pedido. Valida que el local y pedido existan en DynamoDB."
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener Reseñas por Local",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/resenas/local/{{local_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"resenas",
+								"local",
+								"{{local_id}}"
+							]
+						},
+						"description": "Obtiene todas las reseñas de un local específico."
 					},
 					"response": []
 				},
@@ -184,7 +204,16 @@
 					"name": "Obtener Reseñas de Empleado",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"rol\": \"cocinero\"\n}"
+						},
 						"url": {
 							"raw": "{{base_url}}/resenas/{{local_id}}/{{dni}}",
 							"host": [
@@ -196,7 +225,7 @@
 								"{{dni}}"
 							]
 						},
-						"description": "Obtiene todas las reseñas de un empleado específico."
+						"description": "Obtiene todas las reseñas de un empleado específico. El body puede incluir opcionalmente el campo 'rol' (cocinero, despachador, repartidor). Si no se proporciona, se busca el rol en la tabla de empleados."
 					},
 					"response": []
 				},
@@ -215,14 +244,13 @@
 							"raw": "{\n  \"resena\": \"Servicio excelente, muy recomendado\",\n  \"calificacion\": 5\n}"
 						},
 						"url": {
-							"raw": "{{base_url}}/resenas/{{local_id}}/{{dni}}/{{resena_id}}",
+							"raw": "{{base_url}}/resenas/{{local_id}}/{{resena_id}}",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"resenas",
 								"{{local_id}}",
-								"{{dni}}",
 								"{{resena_id}}"
 							]
 						},
@@ -236,14 +264,13 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/resenas/{{local_id}}/{{dni}}/{{resena_id}}",
+							"raw": "{{base_url}}/resenas/{{local_id}}/{{resena_id}}",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"resenas",
 								"{{local_id}}",
-								"{{dni}}",
 								"{{resena_id}}"
 							]
 						},
@@ -252,7 +279,7 @@
 					"response": []
 				}
 			],
-			"description": "Endpoints para la gestión de reseñas de empleados por pedido"
+			"description": "Endpoints para la gestión de reseñas de pedidos. Ahora con estructura simplificada usando local_id y resena_id como claves."
 		}
 	],
 	"variable": [

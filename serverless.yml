@@ -79,11 +79,20 @@ functions:
           cors: true
           integration: lambda-proxy
 
+  obtenerResenasPorLocal:
+    handler: resenhas/obtenerResenasPorLocal.lambda_handler
+    events:
+      - http:
+          path: /resenas/local/{local_id}
+          method: get
+          cors: true
+          integration: lambda-proxy
+
   obtenerResenasPorEmpleado:
     handler: resenhas/obtenerResenasPorEmpleado.lambda_handler
     events:
       - http:
-          path: /resenas/{local_id}/{empleado_dni}
+          path: /resenas/{local_id}/{dni}
           method: get
           cors: true
           integration: lambda-proxy
@@ -92,7 +101,7 @@ functions:
     handler: resenhas/actualizarResena.lambda_handler
     events:
       - http:
-          path: /resenas/{local_id}/{empleado_dni}/{resena_id}
+          path: /resenas/{local_id}/{resena_id}
           method: put
           cors: true
           integration: lambda-proxy
@@ -101,7 +110,7 @@ functions:
     handler: resenhas/eliminarResena.lambda_handler
     events:
       - http:
-          path: /resenas/{local_id}/{empleado_dni}/{resena_id}
+          path: /resenas/{local_id}/{resena_id}
           method: delete
           cors: true
           integration: lambda-proxy
