@@ -1,8 +1,10 @@
-import boto3, json, os
+import boto3, json, os, re
 from decimal import Decimal
+from botocore.exceptions import ClientError
 
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table(os.environ['TABLE_EMPLEADOS'])
+table_locales = dynamodb.Table(os.environ['TABLE_LOCALES'])
 
 class DecimalEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -13,17 +15,30 @@ class DecimalEncoder(json.JSONEncoder):
 def lambda_handler(event, context):
     body = json.loads(event['body'])
 
-    required = ["local_id", "dni", "nombre", "apellido", "role"]
+    required = ["local_id", "dni", "nombre", "apellido", "role", "sueldo"]
     for field in required:
         if field not in body:
             return {'statusCode': 400, 'body': json.dumps({'error': f"Falta el campo requerido: {field}"})}
 
-    # Validaciones y conversión a Decimal
-    calificacion = Decimal(str(body.get('calificacion_prom', 0)))
-    if not (Decimal('0') <= calificacion <= Decimal('5')):
-        return {'statusCode': 400, 'body': json.dumps({'error': 'La calificación debe estar entre 0 y 5'})}
+    # Validar existencia del local
+    try:
+        response = table_locales.get_item(Key={'local_id': body['local_id']})
+        if 'Item' not in response:
+            return {'statusCode': 400, 'body': json.dumps({'error': 'El local_id no existe en la tabla de locales'})}
+    except ClientError as e:
+        return {'statusCode': 500, 'body': json.dumps({'error': f"Error al verificar local: {str(e)}"})}
 
-    sueldo = Decimal(str(body.get('sueldo', 0)))
+    # Validar formato DNI peruano (8 dígitos numéricos)
+    if not re.match(r'^\d{8}$', body['dni']):
+        return {'statusCode': 400, 'body': json.dumps({'error': 'El DNI debe tener exactamente 8 dígitos numéricos'})}
+
+    # Validar rol
+    roles_validos = ["Repartidor", "Cocinero", "Despachador"]
+    if body['role'] not in roles_validos:
+        return {'statusCode': 400, 'body': json.dumps({'error': f"El rol debe ser uno de: {', '.join(roles_validos)}"})}
+
+    # Validar sueldo
+    sueldo = Decimal(str(body['sueldo']))
     if sueldo < 0:
         return {'statusCode': 400, 'body': json.dumps({'error': 'El sueldo no puede ser negativo'})}
 
@@ -33,8 +48,9 @@ def lambda_handler(event, context):
         'nombre': body['nombre'],
         'apellido': body['apellido'],
         'role': body['role'],
-        'calificacion_prom': calificacion,
-        'sueldo': sueldo
+        'calificacion_prom': Decimal('0'),
+        'sueldo': sueldo,
+        'ocupado': False
     }
 
     table.put_item(Item=item)
