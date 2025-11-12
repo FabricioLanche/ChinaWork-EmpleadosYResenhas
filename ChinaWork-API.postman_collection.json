@@ -215,12 +215,13 @@
 							"raw": "{\n  \"rol\": \"cocinero\"\n}"
 						},
 						"url": {
-							"raw": "{{base_url}}/resenas/{{local_id}}/{{dni}}",
+							"raw": "{{base_url}}/resenas/empleado/{{local_id}}/{{dni}}",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"resenas",
+								"empleado",
 								"{{local_id}}",
 								"{{dni}}"
 							]

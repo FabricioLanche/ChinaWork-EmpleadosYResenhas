@@ -92,7 +92,7 @@ functions:
     handler: resenhas/obtenerResenasPorEmpleado.lambda_handler
     events:
       - http:
-          path: /resenas/{local_id}/{dni}
+          path: /resenas/empleado/{local_id}/{dni}
           method: get
           cors: true
           integration: lambda-proxy
