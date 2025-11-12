@@ -1,9 +1,9 @@
-import boto3, json
+import boto3, json, os
 from boto3.dynamodb.conditions import Key
 from decimal import Decimal
 
 dynamodb = boto3.resource('dynamodb')
-table = dynamodb.Table('ChinaWok-Empleados')
+table = dynamodb.Table(os.environ['TABLE_EMPLEADOS'])
 
 class DecimalEncoder(json.JSONEncoder):
     def default(self, obj):

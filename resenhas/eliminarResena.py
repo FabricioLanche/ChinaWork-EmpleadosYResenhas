@@ -1,7 +1,7 @@
-import boto3, json
+import boto3, json, os
 
 dynamodb = boto3.resource('dynamodb')
-table = dynamodb.Table('ChinaWok-Resenas')
+table = dynamodb.Table(os.environ['TABLE_RESENAS'])
 
 def lambda_handler(event, context):
     local_id = event['pathParameters']['local_id']

@@ -1,11 +1,11 @@
-import boto3
+import boto3, os
 from boto3.dynamodb.conditions import Key
 from decimal import Decimal
 import json
 
 dynamodb = boto3.resource('dynamodb')
-tabla_resenas = dynamodb.Table('ChinaWok-Resenas')
-tabla_empleados = dynamodb.Table('ChinaWok-Empleados')
+tabla_resenas = dynamodb.Table(os.environ['TABLE_RESENAS'])
+tabla_empleados = dynamodb.Table(os.environ['TABLE_EMPLEADOS'])
 
 def lambda_handler(event, context):
     try:

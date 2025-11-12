@@ -1,5 +1,5 @@
-org: jhoganpachacutec
-service: china-work-resenha-empleado
+org: flanche
+service: chinawok-empleados
 
 provider:
   name: aws
@@ -8,6 +8,9 @@ provider:
   timeout: 20
   iam:
     role: arn:aws:iam::${env:AWS_ACCOUNT_ID}:role/LabRole
+  environment:
+    TABLE_EMPLEADOS: ${env:TABLE_EMPLEADOS}
+    TABLE_RESENAS: ${env:TABLE_RESENAS}
 
 functions:
   # ========== EMPLEADOS ==========
@@ -101,14 +104,3 @@ functions:
           method: delete
           cors: true
           integration: lambda-proxy
-
-  # ========== DYNAMODB STREAMS ==========
-  actualizarPromedioEmpleado:
-    handler: resenhas/actualizarPromedioEmpleado.lambda_handler
-    events:
-      - stream:
-          type: dynamodb
-          arn: ${env:RESENAS_STREAM_ARN}
-          batchSize: 10
-          startingPosition: LATEST
-          enabled: true
