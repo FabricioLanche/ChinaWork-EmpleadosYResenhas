@@ -11,6 +11,7 @@ provider:
   environment:
     TABLE_EMPLEADOS: ${env:TABLE_EMPLEADOS}
     TABLE_RESENAS: ${env:TABLE_RESENAS}
+    TABLE_LOCALES: ${env:TABLE_LOCALES}
 
 functions:
   # ========== EMPLEADOS ==========
